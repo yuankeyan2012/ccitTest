@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chinacoal.microservice.impl.mapper.OrgEmppositionMapper">
+
+    
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        POSITIONID AS positionid, EMPID AS empid, ISMAIN AS ismain, TENANT_ID AS tenantId, APP_ID AS appId
+    </sql>
+
+
+	<update id="updatePosition">
+			update org_empposition set POSITIONID =#{currentId}	 where POSITIONID = #{originId} and EMPID = #{empId}
+	</update>
+	
+</mapper>

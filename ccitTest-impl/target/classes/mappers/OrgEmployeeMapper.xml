@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chinacoal.microservice.impl.mapper.OrgEmployeeMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.chinacoal.microservice.model.organization.OrgEmployee">
+        <id column="EMPID" property="empid" />
+        <result column="EMPCODE" property="empcode" />
+        <result column="OPERATORID" property="operatorid" />
+        <result column="USERID" property="userid" />
+        <result column="EMPNAME" property="empname" />
+        <result column="REALNAME" property="realname" />
+        <result column="GENDER" property="gender" />
+        <result column="BIRTHDATE" property="birthdate" />
+        <result column="POSITION" property="position" />
+        <result column="EMPSTATUS" property="empstatus" />
+        <result column="CARDTYPE" property="cardtype" />
+        <result column="CARDNO" property="cardno" />
+        <result column="INDATE" property="indate" />
+        <result column="OUTDATE" property="outdate" />
+        <result column="OTEL" property="otel" />
+        <result column="OADDRESS" property="oaddress" />
+        <result column="OZIPCODE" property="ozipcode" />
+        <result column="OEMAIL" property="oemail" />
+        <result column="FAXNO" property="faxno" />
+        <result column="MOBILENO" property="mobileno" />
+        <result column="QQ" property="qq" />
+        <result column="HTEL" property="htel" />
+        <result column="HADDRESS" property="haddress" />
+        <result column="HZIPCODE" property="hzipcode" />
+        <result column="PEMAIL" property="pemail" />
+        <result column="PARTY" property="party" />
+        <result column="DEGREE" property="degree" />
+        <result column="SORTNO" property="sortno" />
+        <result column="MAJOR" property="major" />
+        <result column="SPECIALTY" property="specialty" />
+        <result column="WORKEXP" property="workexp" />
+        <result column="REGDATE" property="regdate" />
+        <result column="CREATETIME" property="createtime" />
+        <result column="LASTMODYTIME" property="lastmodytime" />
+        <result column="ORGIDLIST" property="orgidlist" />
+        <result column="ORGID" property="orgid" />
+        <result column="REMARK" property="remark" />
+        <result column="TENANT_ID" property="tenantId" />
+        <result column="APP_ID" property="appId" />
+        <result column="WEIBO" property="weibo" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        EMPID AS empid, EMPCODE AS empcode, OPERATORID AS operatorid, USERID AS userid, EMPNAME AS empname, REALNAME AS realname, GENDER AS gender, BIRTHDATE AS birthdate, POSITION AS position, EMPSTATUS AS empstatus, CARDTYPE AS cardtype, CARDNO AS cardno, INDATE AS indate, OUTDATE AS outdate, OTEL AS otel, OADDRESS AS oaddress, OZIPCODE AS ozipcode, OEMAIL AS oemail, FAXNO AS faxno, MOBILENO AS mobileno, QQ AS qq, HTEL AS htel, HADDRESS AS haddress, HZIPCODE AS hzipcode, PEMAIL AS pemail, PARTY AS party, DEGREE AS degree, SORTNO AS sortno, MAJOR AS major, SPECIALTY AS specialty, WORKEXP AS workexp, REGDATE AS regdate, CREATETIME AS createtime, LASTMODYTIME AS lastmodytime, ORGIDLIST AS orgidlist, ORGID AS orgid, REMARK AS remark, TENANT_ID AS tenantId, APP_ID AS appId, WEIBO AS weibo
+    </sql>
+
+	<select id="selectAll" parameterType="java.util.Map" resultType="com.chinacoal.microservice.model.organization.vo.EmployeeVO">
+		select f.POSINAME as position ,a.EMPID,EMPCODE,OPERATORID,h.USERNAME as USERID,EMPNAME,REALNAME,b.DICT_NAME as genderId ,b.DICT_ID as GENDER, BIRTHDATE,c.DICT_NAME as  empStatusId,c.DICT_ID as EMPSTATUS,INDATE,OUTDATE,OTEL,
+		OADDRESS,OEMAIL,MOBILENO,QQ,HTEL,HADDRESS,PEMAIL,d.DICT_NAME as PARTY,d.DICT_ID as partyId,a.SORTNO,WORKEXP,a.REGDATE,a.REMARK,i.DICT_NAME as userStatus,i.DICT_ID as userStatusId  from 
+		(select * from org_employee 
+			<choose>
+		            <when test="ids !=null and ids.size()>0">
+		              where   EMPID in 
+		                <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">  
+		                    #{item}  
+		                </foreach>
+		            </when>
+		            <otherwise>
+		                0 = 1
+		            </otherwise>
+		        </choose>
+		order by SORTNO ASC) a
+		left join  (select * from eos_dict )b on a.GENDER = b.DICT_ID
+		left join  (select * from eos_dict )c on a.EMPSTATUS = c.DICT_ID
+		left join  (select * from eos_dict )d on a.PARTY = d.DICT_ID
+		left join org_empposition b on a.empid = b.empid        
+		left join org_position c on b.POSITIONID = c.POSITIONID
+		left join ccms_users h on a.USERID = h.USER_ACCOUNT_ID
+		left join (select * from eos_dict )i on h.user_type = i.DICT_ID
+		left join org_position f on a.position = f.POSITIONID 
+	</select>
+	
+	
+	<select id="empSearch" resultType="com.chinacoal.microservice.model.organization.vo.EmployeeVO">
+		select f.POSINAME as position ,a.EMPID,EMPCODE,OPERATORID,h.USERNAME as userName,USERID,EMPNAME,REALNAME,b.DICT_NAME as genderId,b.DICT_ID as GENDER, BIRTHDATE,c.DICT_NAME as empStatusId,c.DICT_ID as  EMPSTATUS,INDATE,OUTDATE,OTEL,
+		OADDRESS,OEMAIL,MOBILENO,QQ,HTEL,HADDRESS,PEMAIL,d.DICT_NAME as PARTY,d.DICT_ID as partyId,a.SORTNO,WORKEXP,a.REGDATE,a.REMARK,i.DICT_NAME as userStatus,i.DICT_ID as userStatusId  from 
+		(select * from org_employee 
+			 <where>
+				 	 <if test='orgEmployee.empCode != null and orgEmployee.empCode != "" '>EMPCODE like  CONCAT('%',#{orgEmployee.empCode},"%") </if>
+				 	 <if test='orgEmployee.empName != null and orgEmployee.empName != "" '> and EMPNAME like  CONCAT('%',#{orgEmployee.empName},"%") </if>
+				 	 <if test='orgEmployee.userId != null and orgEmployee.userId != "" '>and USERID like  CONCAT('%',#{orgEmployee.userId},"%") </if>
+				 	 <if test='orgEmployee.orgId != null and orgEmployee.orgId != "" '>and ORGID like  CONCAT('%',#{orgEmployee.orgId},"%") </if>
+				 </where>
+		order by SORTNO ASC) a
+		left join  (select * from eos_dict )b on a.GENDER = b.DICT_ID
+		left join  (select * from eos_dict )c on a.EMPSTATUS = c.DICT_ID
+		left join  (select * from eos_dict )d on a.PARTY = d.DICT_ID
+		left join org_empposition b on a.empid = b.empid        
+		left join org_position c on b.POSITIONID = c.POSITIONID
+		left join ccms_users h on a.USERID = h.USER_ACCOUNT_ID
+		left join (select * from eos_dict )i on h.user_type = i.DICT_ID
+		left join org_position f on a.position = f.POSITIONID 
+	</select>
+	
+	<select id="findEmpByUserId" resultType="com.chinacoal.microservice.model.organization.vo.EmployeeVO">
+		select f.POSINAME as position ,a.EMPID,EMPCODE,OPERATORID,h.USERNAME as userName,EMPNAME,REALNAME,b.DICT_NAME as  genderId,b.DICT_ID as GENDER, BIRTHDATE,c.DICT_NAME as empStatusId,c.DICT_ID as  EMPSTATUS,INDATE,OUTDATE,OTEL,
+		OADDRESS,OEMAIL,MOBILENO,QQ,HTEL,HADDRESS,PEMAIL,d.DICT_NAME as PARTY,d.DICT_ID as partyId,a.SORTNO,WORKEXP,a.REGDATE,a.REMARK,i.DICT_NAME as userStatus,i.DICT_ID as userStatusId  from 
+		(select * from org_employee where USERID =#{userId} order by SORTNO ASC) a
+		left join  (select * from eos_dict )b on a.GENDER = b.DICT_ID
+		left join  (select * from eos_dict )c on a.EMPSTATUS = c.DICT_ID
+		left join  (select * from eos_dict )d on a.PARTY = d.DICT_ID
+		left join org_empposition b on a.empid = b.empid        
+		left join org_position c on b.POSITIONID = c.POSITIONID
+		left join ccms_users h on a.USERID = h.USER_ACCOUNT_ID
+		left join (select * from eos_dict )i on h.user_type = i.DICT_ID
+		left join org_position f on a.position = f.POSITIONID 
+	</select>
+	
+	<select id="findEmpByEmpId" resultType="com.chinacoal.microservice.model.organization.vo.EmployeeVO">
+		select f.POSINAME as position ,a.EMPID,EMPCODE,OPERATORID,h.USERNAME as userName,EMPNAME,REALNAME,b.DICT_NAME as  genderId,b.DICT_ID as GENDER , BIRTHDATE,c.DICT_NAME as empStatusId ,c.DICT_ID as  EMPSTATUS,INDATE,OUTDATE,OTEL,
+		OADDRESS,OEMAIL,MOBILENO,QQ,HTEL,HADDRESS,PEMAIL,d.DICT_NAME as PARTY,d.DICT_ID as partyId,a.SORTNO,WORKEXP,a.REGDATE,a.REMARK,i.DICT_NAME as userStatus,i.DICT_ID as userStatusId  from 
+		(select * from org_employee where EMPID =#{empId} order by SORTNO ASC) a
+		left join  (select * from eos_dict )b on a.GENDER = b.DICT_ID
+		left join  (select * from eos_dict )c on a.EMPSTATUS = c.DICT_ID
+		left join  (select * from eos_dict )d on a.PARTY = d.DICT_ID
+		left join org_empposition b on a.empid = b.empid        
+		left join org_position c on b.POSITIONID = c.POSITIONID
+		left join ccms_users h on a.USERID = h.USER_ACCOUNT_ID
+		left join (select * from eos_dict )i on h.user_type = i.DICT_ID
+		left join org_position f on a.position = f.POSITIONID 
+	</select>
+	
+	<update id="updateOrg">
+		update org_employee set ORGID = #{currentId} where ORGID = #{originId} and EMPID = #{empId}
+	</update>
+	
+	<select id="geUserListByUserId"  resultType="EmployeeVO">
+		select f.POSINAME as position ,a.EMPID,EMPCODE,OPERATORID,h.USER_ACCOUNT_ID ,h.USERNAME as userName,EMPNAME,REALNAME,b.DICT_NAME as  genderId,b.DICT_ID as GENDER, BIRTHDATE,c.DICT_NAME as empStatusId,c.DICT_ID as  EMPSTATUS,INDATE,OUTDATE,OTEL,
+		OADDRESS,OEMAIL,MOBILENO,QQ,HTEL,HADDRESS,PEMAIL,d.DICT_NAME as PARTY,d.DICT_ID as partyId,a.SORTNO,WORKEXP,a.REGDATE,a.REMARK,i.DICT_NAME as userStatus,i.DICT_ID as userStatusId  from 
+		(select * from org_employee order by SORTNO ASC) a
+		left join  (select * from eos_dict )b on a.GENDER = b.DICT_ID
+		left join  (select * from eos_dict )c on a.EMPSTATUS = c.DICT_ID
+		left join  (select * from eos_dict )d on a.PARTY = d.DICT_ID
+		left join org_empposition b on a.empid = b.empid        
+		left join org_position c on b.POSITIONID = c.POSITIONID
+		left join ccms_users h on a.USERID = h.USER_ACCOUNT_ID
+		left join (select * from eos_dict )i on h.user_type = i.DICT_ID
+		left join org_position f on a.position = f.POSITIONID 
+		
+         where USER_ACCOUNT_ID in 
+		<foreach collection="array" item="userId" index="index" open="(" close=")" separator=",">
+	        #{userId}
+	    </foreach>
+	</select>
+	
+	<select id="geUserListByUserIdForPage"  resultType="EmployeeVO">
+		select f.POSINAME as position ,a.EMPID,EMPCODE,OPERATORID,h.USER_ACCOUNT_ID ,h.USERNAME as userName,EMPNAME,REALNAME,b.DICT_NAME as  genderId,b.DICT_ID as GENDER, BIRTHDATE,c.DICT_NAME as empStatusId,c.DICT_ID as  EMPSTATUS,INDATE,OUTDATE,OTEL,
+		OADDRESS,OEMAIL,MOBILENO,QQ,HTEL,HADDRESS,PEMAIL,d.DICT_NAME as PARTY,d.DICT_ID as partyId,a.SORTNO,WORKEXP,a.REGDATE,a.REMARK,i.DICT_NAME as userStatus,i.DICT_ID as userStatusId  from 
+		(select * from org_employee order by SORTNO ASC) a
+		left join  (select * from eos_dict )b on a.GENDER = b.DICT_ID
+		left join  (select * from eos_dict )c on a.EMPSTATUS = c.DICT_ID
+		left join  (select * from eos_dict )d on a.PARTY = d.DICT_ID
+		left join org_empposition b on a.empid = b.empid        
+		left join org_position c on b.POSITIONID = c.POSITIONID
+		left join ccms_users h on a.USERID = h.USER_ACCOUNT_ID
+		left join (select * from eos_dict )i on h.user_type = i.DICT_ID
+		left join org_position f on a.position = f.POSITIONID 
+		
+         where USER_ACCOUNT_ID in 
+		<foreach collection="array" item="userId" index="index" open="(" close=")" separator=",">
+	        #{userId}
+	    </foreach>
+	</select>
+
+
+	<select id="geUserListBydeartmentIdOrCode"  resultType="EmployeeVO" parameterType="java.util.HashMap">
+		select j.ORGID,j.ORGCODE,f.POSINAME as position ,a.EMPID,EMPCODE,OPERATORID, h.USERNAME as userName,EMPNAME,REALNAME,b.DICT_NAME as  genderId,b.DICT_ID as GENDER, BIRTHDATE,c.DICT_NAME as empStatusId,c.DICT_ID as  EMPSTATUS,INDATE,OUTDATE,OTEL,
+		OADDRESS,OEMAIL,MOBILENO,QQ,HTEL,HADDRESS,PEMAIL,d.DICT_NAME as PARTY,d.DICT_ID as partyId,a.SORTNO,WORKEXP,a.REGDATE,a.REMARK,i.DICT_NAME as userStatus,i.DICT_ID as userStatusId  from 
+		(select * from org_employee order by SORTNO ASC) a
+		left join  (select * from eos_dict )b on a.GENDER = b.DICT_ID
+		left join  (select * from eos_dict )c on a.EMPSTATUS = c.DICT_ID
+		left join  (select * from eos_dict )d on a.PARTY = d.DICT_ID
+		left join org_empposition b on a.empid = b.empid        
+		left join org_position c on b.POSITIONID = c.POSITIONID
+		left join ccms_users h on a.USERID = h.USER_ACCOUNT_ID	
+		left join (select * from eos_dict )i on h.user_type = i.DICT_ID
+		left join org_position f on a.position = f.POSITIONID 
+		join (select *from org_organization  
+		 <choose>
+             <when test=" flag == 'id' ">
+                 where ORGID in
+             </when>
+             <otherwise>
+                where ORGCODE in
+             </otherwise>
+         </choose>
+		 <foreach collection="departmentMark" item="id" index="index" open="(" close=")" separator=",">
+	        #{id}
+	    </foreach>
+		) j on a.ORGID = J.ORGID
+	</select>
+	
+	<select id="geUserListBydeartmentIdOrCodeForPage" resultType="EmployeeVO" parameterType="java.util.HashMap">
+		select j.ORGID,j.ORGCODE,f.POSINAME as position ,a.EMPID,EMPCODE,OPERATORID, h.USERNAME as userName,EMPNAME,REALNAME,b.DICT_NAME as  genderId,b.DICT_ID as GENDER, BIRTHDATE,c.DICT_NAME as empStatusId,c.DICT_ID as  EMPSTATUS,INDATE,OUTDATE,OTEL,
+		OADDRESS,OEMAIL,MOBILENO,QQ,HTEL,HADDRESS,PEMAIL,d.DICT_NAME as PARTY,d.DICT_ID as partyId,a.SORTNO,WORKEXP,a.REGDATE,a.REMARK,i.DICT_NAME as userStatus,i.DICT_ID as userStatusId  from 
+		(select * from org_employee order by SORTNO ASC) a
+		left join  (select * from eos_dict )b on a.GENDER = b.DICT_ID
+		left join  (select * from eos_dict )c on a.EMPSTATUS = c.DICT_ID
+		left join  (select * from eos_dict )d on a.PARTY = d.DICT_ID
+		left join org_empposition b on a.empid = b.empid        
+		left join org_position c on b.POSITIONID = c.POSITIONID
+		left join ccms_users h on a.USERID = h.USER_ACCOUNT_ID	
+		left join (select * from eos_dict )i on h.user_type = i.DICT_ID
+		left join org_position f on a.position = f.POSITIONID 
+		join (select *from org_organization  
+		 <choose>
+             <when test=" flag == 'id' ">
+                 where ORGID in
+             </when>
+             <otherwise>
+                where ORGCODE in
+             </otherwise>
+         </choose>
+		 <foreach collection="departmentMark" item="id" index="index" open="(" close=")" separator=",">
+	        #{id}
+	    </foreach>
+		) j on a.ORGID = J.ORGID
+	
+	</select>
+	 
+	
+</mapper>
